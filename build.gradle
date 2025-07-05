@@ -1,0 +1,44 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.tech.challenge'
+version = '1.0.0'
+description = 'HighNote Interview Technical Challenge - Java Project'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Lombok for reducing boilerplate code
+    compileOnly 'org.projectlombok:lombok:1.18.38'
+    annotationProcessor 'org.projectlombok:lombok:1.18.38'
+
+    // SLF4J API for logging
+    implementation 'org.slf4j:slf4j-api:2.0.17'
+
+    implementation 'org.apache.commons:commons-lang3:3.17.0' // or latest
+
+    // JUnit 5 for testing
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Mockito for mocking in tests
+    testImplementation 'org.mockito:mockito-core:5.3.1'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.3.1'
+
+    // SLF4J Simple binding for testing
+    testImplementation 'org.slf4j:slf4j-simple:2.0.9'
+}
+
+test {
+    useJUnitPlatform()
+}
