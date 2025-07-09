@@ -49,8 +49,6 @@ public class TransactionProcessor {
                         log.error("Failed to parse transaction message: {}", message, e);
                         return Optional.<Transaction>empty();
                     }
-
-
                 })
                 .filter(Optional::isPresent)
                 .map(Optional::get)

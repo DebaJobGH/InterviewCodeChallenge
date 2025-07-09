@@ -1,6 +1,10 @@
 package com.interview.code.challenge.highnote.processor;
 
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,21 +33,7 @@ class TransactionProcessorServiceTest {
 
     @Test
     void testProcessorOutputWithMixedInput() {
-        String[] input = {
-                "10100712345670000200000",
-                "1010064447770000100000",
-                "10100712345670000080000",
-                "1010062345910000040000",
-                "1010064447770000050000",
-                "1010061111110000200000",
-                "1020064447770000020000",
-                "1020064447770000020000",
-                "10200712345670000020000",
-                "10200712345670000020000",
-                "10200712345670000015000",
-                "1020062345910000030000",
-                "1020061111110000010000"
-        };
+        String[] input = loadFileLines("mix_input.txt");
 
         ProcessTransactionsRequest request = ProcessTransactionsRequest.builder().transactions(input).build();
         ProcessTransactionsResponse response = app.processTransactions(request);
@@ -71,14 +61,7 @@ class TransactionProcessorServiceTest {
 
     @Test
     void testProcessorOutputWithDepositOnly() {
-        String[] input = {
-                "10100712345670000200000",
-                "1010064447770000100000",
-                "10100712345670000080000",
-                "1010062345910000040000",
-                "1010064447770000050000",
-                "1010061111110000200000"
-        };
+        String[] input = loadFileLines("deposit_only_input.txt");
 
         ProcessTransactionsRequest request = ProcessTransactionsRequest.builder().transactions(input).build();
         ProcessTransactionsResponse response = app.processTransactions(request);
@@ -102,5 +85,23 @@ class TransactionProcessorServiceTest {
         assertTrue(accountMap.containsKey("444777"));
         assertEquals(150000, accountMap.get("444777").getBalanceInCents());
 
+    }
+
+    private static String[] loadFileLines(String fileName) {
+        try {
+            BufferedReader in = new BufferedReader(
+                    new FileReader("src/test/resources/"+ fileName));
+            String str;
+            List<String> list = new ArrayList<String>();
+            while((str = in.readLine()) != null){
+                list.add(str);
+            }
+            String[] stringArr = list.toArray(new String[0]);
+            in.close();
+            return stringArr;
+        } catch (IOException e) {
+            // Return empty array if file not found or error reading
+            return new String[0];
+        }
     }
 } 
