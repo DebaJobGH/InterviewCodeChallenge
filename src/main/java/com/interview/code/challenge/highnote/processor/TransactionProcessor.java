@@ -88,6 +88,7 @@ public class TransactionProcessor {
                 }
                 processWithdrawal(transaction, account);
             }
+            case TRANSFER -> processTransfer(transaction);
             default -> log.error("Unknown transaction type: {}", transaction.getType());
         }
     }
@@ -113,6 +114,7 @@ public class TransactionProcessor {
             account = BankAccount.builder()
                     .accountNumber(accountNumber)
                     .balanceInCents(0)
+                    .totalOutInCents(0)
                     .build();
             accounts.put(accountNumber, account);
             log.info("Created new account: {}", accountNumber);
@@ -146,6 +148,44 @@ public class TransactionProcessor {
         if (!success) {
             log.warn("Withdrawal failed for account: {}", accountNumber);
         }
+    }
+    
+    /**
+     * Processes a transfer transaction.
+     * Both source and destination accounts must exist.
+     * @param transaction The transfer transaction
+     */
+    private void processTransfer(Transaction transaction) {
+        String sourceAccountNumber = transaction.getSourceAccountNumber();
+        String destinationAccountNumber = transaction.getDestinationAccountNumber();
+        long amountInCents = transaction.getAmountInCents();
+        
+        // Business logic: Both source and destination accounts must exist
+        BankAccount sourceAccount = accounts.get(sourceAccountNumber);
+        BankAccount destinationAccount = accounts.get(destinationAccountNumber);
+        
+        if (Objects.isNull(sourceAccount) || Objects.isNull(destinationAccount)) {
+            log.warn("Transfer failed: Either source account {} or destination account {} does not exist", sourceAccountNumber, destinationAccountNumber);
+            return;
+        }
+        
+        // Business logic: Source and destination accounts must be different
+        if (sourceAccountNumber.equals(destinationAccountNumber)) {
+            log.warn("Transfer failed: Source and destination accounts cannot be the same: {}", sourceAccountNumber);
+            return;
+        }
+        
+        // Attempt transfer out from source account
+        boolean transferOutSuccess = sourceAccount.transferOut(amountInCents);
+        if (!transferOutSuccess) {
+            log.warn("Transfer failed: Cannot transfer out from source account: {}", sourceAccountNumber);
+            return;
+        }
+        
+        // Transfer in to destination account (no limits on receiving)
+        destinationAccount.deposit(amountInCents);
+        log.info("Transfer successful: {} cents from account {} to account {}", 
+                amountInCents, sourceAccountNumber, destinationAccountNumber);
     }
     
     /**

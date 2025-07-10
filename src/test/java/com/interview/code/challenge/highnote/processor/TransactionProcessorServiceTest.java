@@ -32,8 +32,36 @@ class TransactionProcessorServiceTest {
     }
 
     @Test
-    void testProcessorOutputWithMixedInput() {
-        String[] input = loadFileLines("mix_input.txt");
+    void testProcessorOutputWithMixTransactionInput() {
+        String[] input = loadFileLines("mix_transaction_input.txt");
+
+        ProcessTransactionsRequest request = ProcessTransactionsRequest.builder().transactions(input).build();
+        ProcessTransactionsResponse response = app.processTransactions(request);
+
+        assertNotNull(response);
+        assertNotNull(response.getBankAccounts());
+        assertEquals(3, response.getBankAccounts().size());
+
+        List<BankAccount> accounts = response.getBankAccounts();
+
+        // Convert to map for easy validation
+        Map<String, BankAccount> accountMap = accounts.stream()
+                .collect(Collectors.toMap(BankAccount::getAccountNumber, acc -> acc));
+
+        assertTrue(accountMap.containsKey("1234567"));
+        assertEquals(45000, accountMap.get("1234567").getBalanceInCents());
+
+        assertTrue(accountMap.containsKey("234591"));
+        assertEquals(45000, accountMap.get("234591").getBalanceInCents());
+
+        assertTrue(accountMap.containsKey("444777"));
+        assertEquals(100000, accountMap.get("444777").getBalanceInCents());
+
+    }
+
+    @Test
+    void testProcessorOutputWithDepositAndWithdrawalInput() {
+        String[] input = loadFileLines("deposit_withdrawal_input.txt");
 
         ProcessTransactionsRequest request = ProcessTransactionsRequest.builder().transactions(input).build();
         ProcessTransactionsResponse response = app.processTransactions(request);
@@ -49,10 +77,10 @@ class TransactionProcessorServiceTest {
             .collect(Collectors.toMap(BankAccount::getAccountNumber, acc -> acc));
 
         assertTrue(accountMap.containsKey("1234567"));
-        assertEquals(25000, accountMap.get("1234567").getBalanceInCents());
+        assertEquals(40000, accountMap.get("1234567").getBalanceInCents());
 
         assertTrue(accountMap.containsKey("234591"));
-        assertEquals(10000, accountMap.get("234591").getBalanceInCents());
+        assertEquals(40000, accountMap.get("234591").getBalanceInCents());
 
         assertTrue(accountMap.containsKey("444777"));
         assertEquals(110000, accountMap.get("444777").getBalanceInCents());

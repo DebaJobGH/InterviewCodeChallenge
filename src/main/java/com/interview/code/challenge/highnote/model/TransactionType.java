@@ -11,7 +11,9 @@ public enum TransactionType {
     /** Deposit operation (code: 1010) */
     DEPOSIT("1010"),
     /** Withdrawal operation (code: 1020) */
-    WITHDRAWAL("1020");
+    WITHDRAWAL("1020"),
+    /** Transfer operation (code: 2010) */
+    TRANSFER("2010");
     
     /** The 4-character code for the transaction type.*/
     private final String code;

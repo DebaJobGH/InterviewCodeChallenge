@@ -1,0 +1,69 @@
+Current Implementation (Prompt 1)
+---------------------------------
+- Supports Deposit (1010) and Withdrawal (1020) operations
+- Deposit limit: $1000.00 maximum per transaction
+- Withdrawal: Only from existing accounts with sufficient funds
+- No transfer functionality
+
+Extended Requirements (Prompt 2)
+--------------------------------
+- Adds Transfer (2010) operation
+- Additional withdrawal restrictions:
+	- Maximum $200.00 per withdrawal transaction
+	- Maximum $500.00 total withdrawals per account
+- Transfer restrictions:
+	- Maximum $200.00 per transfer transaction
+	- Maximum $500.00 total transfers from source account
+	- Both source and destination accounts must exist
+
+Required Changes
+----------------
+
+1. Model Changes
+----------------
+- TransactionType.java
+	- Add new enum value: TRANSFER("2010")
+
+- Transaction.java
+- Add new fields for transfer operations:
+	- sourceAccountNumber (for transfers)
+	- destinationAccountNumber (for transfers)
+
+- Modify parse() method to handle transfer message format:
+	- Format: 2010<LLVAR-SOURCE-ACCOUNT><LLVAR-DEST-ACCOUNT><AMOUNT-IN-10-DIGITS>
+	- Parse two LLVAR account numbers instead of one
+
+2. BankAccount.java Changes
+---------------------------
+* Add Withdrawal Tracking
+	- Add fields to track withdrawal limits:
+		- totalOutInCents - Total amount withdrawn or transferred out from this account in cents.
+
+* Add constants:
+	- MAX_WITHDRAWAL_PER_TRANSACTION_CENTS = 20000 ($200.00)
+	- MAX_TOTAL_WITHDRAWALS_CENTS = 50000 ($500.00)
+
+* Modify withdraw() method
+	- Add validation for $200.00 per transaction limit
+	- Add validation for $500.00 total withdrawal limit
+	- Update tracking fields on successful withdrawal
+
+* Add transferOut() method
+	- Similar to withdraw but for transfers
+	- Track transfers separately from withdrawals
+	- Apply same $200.00 per transaction and $500.00 total limits
+
+3. TransactionProcessor.java Changes
+------------------------------------
+* Add Transfer Processing
+
+- Add new case in processTransaction() switch statement for TRANSFER
+- Create processTransfer() method:
+	- Validate both source and destination accounts exist
+	- Check a source account has sufficient funds
+	- Apply transfer limits ($200.00 per transaction, $500.00 total)
+	- Perform atomic transfer operation
+
+* Modify processWithdrawal() method
+	- Add new withdrawal limit validations
+	- Update withdrawal tracking
